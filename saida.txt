@@ -1,0 +1,2 @@
+Cadeia abcc rejeitada por esvaziamento de pilha
+Cadeia aabcc rejeitada por esvaziamento de pilha
