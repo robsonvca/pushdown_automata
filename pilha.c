@@ -8,29 +8,25 @@
 char estados[SZ_STD];
 char alfabeto[SZ_STD];
 char alfa_pilha[SZ_STD];
-char estados_finais[SZ_STD];
-char metodo_aceitacao;
-
+char *transicoes[SZ_STD];
 char estado_corrente;
+char metodo_aceitacao;
+char estados_finais[SZ_STD];
+char *cadeias[SZ_STD];
 
 char pilha[SZ_STD];
 int topo;
 
-
-
-char *transicoes[SZ_STD];
-
 void carrega_automato(){
-	register int i, j;
-	char car;
+	register int i, j#;
+	char car, temp[SZ_STD];
 	
-	//Inicializa array
+	//INICIALIZA ARRAYS DE PONTEIROS
 	for(i =0; i <SZ_STD; i++)
-		transicoes[i] = NULL;
+		transicoes[i] = cadeias[i] = NULL;
 	
+	//ESTADOS
 	i =0;
-	
-	//Estados
 	car = getchar();
 	while(car != '\n'){
 		if(isalnum(car)){
@@ -41,9 +37,11 @@ void carrega_automato(){
 	};
 	estados[i] = '\0';
 	i =0;
+	
+	//ESTADO INICIAL
 	estado_corrente = estados[0];
 	
-	//Alfabeto
+	//ALFABETO
 	car = getchar();
 	while(car != '\n'){
 		if(isalpha(car)){
@@ -67,9 +65,8 @@ void carrega_automato(){
 	estados[i] = '\0';
 	i =0;
 	
-	//Transições
+	//TRANSIÇÕES
 	j =0;
-	char temp[SZ_STD];
 	do{
 		car = getchar();
 		while((car != '\n') && (car != '#')){
@@ -88,11 +85,48 @@ void carrega_automato(){
 		};
 	}while(car != '#');
 	
+	//CARREGA MEÓTODO DE ACEITAÇAO
+	metodo_aceitacao = getchar();
 	
-	for(i =0; transicoes[i] != NULL; i++)
-		printf("%s\n", transicoes[i]);
+	//CARREGA ESTADOS FINAIS, SE ACEITAÇÃO FOR 'F'
+	i =0;
+	if(metodo_aceitacao == 'F'){
+		car = getchar(); //Ignorando '\n'
+		car = getchar();
+		while(car != '\n'){
+			if(isalnum(car)){
+				estados_finais[i] = car;
+				i++;
+			};
+			car = getchar();
+		};
+		estados_finais[i] = '\0';
+		i =0;
+	};
 	
 	
+	//CARREGA CADEIAS
+	j =0;
+	do{
+		car = getchar();
+		while((car != '\n') && (car != '#')){
+			if(car != ' '){
+				temp[i] = car;
+				i++;
+			};
+			car = getchar();
+		};
+		if((car != '#')){
+			temp[i] = '\0';
+			cadeias[j] = malloc(strlen(temp));
+			strcpy(cadeias[j], temp);
+			j++;
+			i =0;
+		};
+	}while(car != '#');
+	
+	for(i =0; cadeias[i] != NULL; i++)
+		printf("%s\n", cadeias[i]);
 };
 
 //FUNÇÕES DE PILHA
@@ -147,26 +181,30 @@ int transicao(char estado, char simbolo, char topo_pilha){
 
 int automato(char cadeia[]){
 	register int i;
+	inicializa_pilha();
 	
 	for(i =0; i <strlen(cadeia); i++){
 		if(!transicao(estado_corrente, cadeia[i], retorna_topo()))
 			break;
 	};
 	switch (metodo_aceitacao){
-		case 'P':
+		case 'P':{
 			if(vazia())
 				return 1;
 			break;
-		case 'F': //DEPENDE DA LEITURA DOS ESTADOS FINAIS
-				
+		};
+		case 'F':{
+			for(i =0; estados_finais[i] != '\0'; i++)
+				if(estado_corrente == estados_finais[i])
+					return 1;
+		};
 	};
 	return 0;
 };
 
 
 int main(void){
-	inicializa_pilha();
 	carrega_automato();
-
+	automato("abcc");
 	return 1;
 };
