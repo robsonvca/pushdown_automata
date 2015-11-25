@@ -17,8 +17,60 @@ char *cadeias[SZ_STD];
 char pilha[SZ_STD];
 int topo;
 
+
+/////////////////////////////////////
+//////    FUNÇÕES DA PILHA   ///////
+///////////////////////////////////
+
+void inicializa_pilha(){
+	register int i;
+	topo =0;
+	pilha[topo] = 'Z';
+	for(i =1; i <SZ_STD; i++)
+		pilha[i] = '-';
+};
+
+int vazia(){
+	return (topo <0)? 1 : 0;
+};
+
+char retorna_topo(){
+	if(vazia())
+		return '\0';
+	return pilha[topo];
+};
+
+void push(char *cadeia){
+	int i;
+	for(i = strlen(cadeia); i >=0; i--)
+		if(isalpha(cadeia[i])) //Impede impilhamento de '-' tambem
+			pilha[++topo] = cadeia[i];
+};
+
+char pop(){
+	if(vazia())
+		return '\0';
+	char temp = pilha[topo];
+	pilha[topo--] =  '-';
+	return temp;
+};
+
+void imprime_pilha(){
+	int i;
+	if(vazia())
+		printf("4pilha vazia\n");
+	printf("\nPilha-> ");
+	for(i =topo; i>=0; i--)
+		printf("%c", pilha[i]);
+	printf("\n");
+};
+
+/////////////////////////////////////
+//////  FUNÇÕES DO AUTOMATO  ///////
+///////////////////////////////////
+
 void carrega_automato(){
-	register int i, j#;
+	register int i, j;
 	char car, temp[SZ_STD];
 	
 	//INICIALIZA ARRAYS DE PONTEIROS
@@ -86,6 +138,7 @@ void carrega_automato(){
 	}while(car != '#');
 	
 	//CARREGA MEÓTODO DE ACEITAÇAO
+	car = getchar(); //Ignorando '\n'
 	metodo_aceitacao = getchar();
 	
 	//CARREGA ESTADOS FINAIS, SE ACEITAÇÃO FOR 'F'
@@ -106,6 +159,7 @@ void carrega_automato(){
 	
 	
 	//CARREGA CADEIAS
+	car = getchar(); //Ignorando '\n'	
 	j =0;
 	do{
 		car = getchar();
@@ -129,38 +183,6 @@ void carrega_automato(){
 		printf("%s\n", cadeias[i]);
 };
 
-//FUNÇÕES DE PILHA
-
-void inicializa_pilha(){
-	register int i;
-	topo =0;
-	pilha[topo] = 'Z';
-	for(i =1; i <SZ_STD; i++)
-		pilha[i] = '-';
-};
-
-int vazia(){
-	return (topo <0)? 1 : 0;
-};
-
-char retorna_topo(){
-	if(vazia())
-		return '\0';
-	return pilha[topo];
-};
-
-void push(char *cadeia){
-	int i;
-	for(i = strlen(cadeia)-1; i >=0; i--)
-		pilha[topo++] = cadeia[i];
-};
-
-char pop(){
-	if(vazia())
-		return '\0';
-	return pilha[topo--];
-};
-
 int transicao(char estado, char simbolo, char topo_pilha){
 	register int i;
 	char temp[4];
@@ -170,23 +192,30 @@ int transicao(char estado, char simbolo, char topo_pilha){
 	temp[3] = '\0';
 	
 	for(i =0; transicoes[i] != NULL; i++){
+		//printf("(%c,%c,%c)->", estado, simbolo, topo_pilha);
 		if((strncmp(temp, transicoes[i], 3) == 0)){
+			pop();
 			push(&transicoes[i][5]);
-			estado_corrente = transicoes[i][5];
-			return 1;
+			estado_corrente = transicoes[i][4];
+			//printf(" (%c,%s)\n", transicoes[i][4], &transicoes[i][5]);
 		};
+		//printf("(NULO)\n");
+		
+		//printf("\tstrcncomp(%s, %s, 3)\n", temp, transicoes[i]);
 	};
 	return 0;
 };
 
 int automato(char cadeia[]){
 	register int i;
-	inicializa_pilha();
 	
-	for(i =0; i <strlen(cadeia); i++){
-		if(!transicao(estado_corrente, cadeia[i], retorna_topo()))
-			break;
-	};
+	inicializa_pilha();
+	estado_corrente = estados[0]; // Configura estado inicial
+	
+	strcat(cadeia, "-"); // Adiciona cadeia vazio no final da cadeia;
+	for(i =0; transicao(estado_corrente, cadeia[i], retorna_topo()); i++);
+	//imprime_pilha();
+
 	switch (metodo_aceitacao){
 		case 'P':{
 			if(vazia())
@@ -199,12 +228,35 @@ int automato(char cadeia[]){
 					return 1;
 		};
 	};
+	
+	printf("\n");
 	return 0;
 };
 
 
+
 int main(void){
+	char texto_saida[SZ_STD];
+	int i;
+	
 	carrega_automato();
-	automato("abcc");
+	
+	for(i =0; cadeias[i] != NULL; i++){
+		strcpy(texto_saida, "Cadeia ");
+		strcat(texto_saida, cadeias[i]);
+
+		if(automato(cadeias[i]))
+			strcat(texto_saida, " aceita por ");
+		else		
+			strcat(texto_saida, " rejeitada por ");
+			
+		if(metodo_aceitacao == 'F')
+			strcat(texto_saida, "estados finais\n");		
+		else if(metodo_aceitacao == 'P')
+			strcat(texto_saida, "piha\n");
+			
+		printf("%s", texto_saida);
+	};
+	
 	return 1;
 };
