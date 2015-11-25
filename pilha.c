@@ -25,7 +25,7 @@ int topo;
 void inicializa_pilha(){
 	register int i;
 	topo =0;
-	pilha[topo] = 'Z';
+	pilha[topo] = alfa_pilha[0];
 	for(i =1; i <SZ_STD; i++)
 		pilha[i] = '-';
 };
@@ -137,15 +137,14 @@ void carrega_automato(){
 		};
 	}while(car != '#');
 	
-	//CARREGA MEÓTODO DE ACEITAÇAO
+	//CARREGA METODO DE ACEITAÇAO
 	car = getchar(); //Ignorando '\n'
 	metodo_aceitacao = getchar();
+	car = getchar(); //Ignorando '\n'
 	
-	//CARREGA ESTADOS FINAIS, SE ACEITAÇÃO FOR 'F'
-	i =0;
+	//CARREGA ESTADOS FINAIS, SE ACEITAÇÃO FOR 'F'	
 	if(metodo_aceitacao == 'F'){
 		car = getchar(); //Ignorando '\n'
-		car = getchar();
 		while(car != '\n'){
 			if(isalnum(car)){
 				estados_finais[i] = car;
@@ -156,10 +155,11 @@ void carrega_automato(){
 		estados_finais[i] = '\0';
 		i =0;
 	};
-	
+	//printf("\nestados finais\n");
+	//for(i =0; estados_finais[i] != '\0'; i++)
+		//printf("%c", estados_finais[i]);
 	
 	//CARREGA CADEIAS
-	car = getchar(); //Ignorando '\n'	
 	j =0;
 	do{
 		car = getchar();
@@ -178,9 +178,6 @@ void carrega_automato(){
 			i =0;
 		};
 	}while(car != '#');
-	
-	for(i =0; cadeias[i] != NULL; i++)
-		printf("%s\n", cadeias[i]);
 };
 
 int transicao(char estado, char simbolo, char topo_pilha){
@@ -198,9 +195,9 @@ int transicao(char estado, char simbolo, char topo_pilha){
 			push(&transicoes[i][5]);
 			estado_corrente = transicoes[i][4];
 			//printf(" (%c,%s)\n", transicoes[i][4], &transicoes[i][5]);
+			return 1;
 		};
 		//printf("(NULO)\n");
-		
 		//printf("\tstrcncomp(%s, %s, 3)\n", temp, transicoes[i]);
 	};
 	return 0;
@@ -214,7 +211,7 @@ int automato(char cadeia[]){
 	
 	strcat(cadeia, "-"); // Adiciona cadeia vazio no final da cadeia;
 	for(i =0; transicao(estado_corrente, cadeia[i], retorna_topo()); i++);
-	//imprime_pilha();
+		//imprime_pilha();
 
 	switch (metodo_aceitacao){
 		case 'P':{
@@ -223,13 +220,12 @@ int automato(char cadeia[]){
 			break;
 		};
 		case 'F':{
+			//printf("estado cprrente: %c\n", estado_corrente);
 			for(i =0; estados_finais[i] != '\0'; i++)
 				if(estado_corrente == estados_finais[i])
 					return 1;
 		};
 	};
-	
-	printf("\n");
 	return 0;
 };
 
@@ -251,11 +247,11 @@ int main(void){
 			strcat(texto_saida, " rejeitada por ");
 			
 		if(metodo_aceitacao == 'F')
-			strcat(texto_saida, "estados finais\n");		
+			strcat(texto_saida, "estados finais");		
 		else if(metodo_aceitacao == 'P')
-			strcat(texto_saida, "piha\n");
+			strcat(texto_saida, "pilha");
 			
-		printf("%s", texto_saida);
+		printf("%s\n", texto_saida);
 	};
 	
 	return 1;
