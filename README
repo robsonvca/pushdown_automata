@@ -1,0 +1,51 @@
+pushdown_automata
+
+ENTRADA 1:
+0 1
+a b c
+Z C
+0 a Z > 0 CCZ
+0 a C > 0 CCC
+0 b Z > 1 Z
+0 b C > 1 C
+1 c C > 1 -
+1 - Z > 1 -
+#
+P
+b
+abcc
+aabcc
+#
+
+SAIDA 1:
+Cadeia b aceita por pilha
+Cadeia abcc aceita por pilha
+Cadeia aabcc rejeitada por pilha
+
+
+
+ENTRADA 2:
+0 1 2 3 4
+a c
+Z C
+0 a Z > 2 CCZ
+1 a C > 1 CCC
+1 c C > 3 -
+2 a C > 2 CC
+2 c C > 3 -
+3 c C > 3 -
+3 - Z > 4 Z
+#
+F
+4
+aaccc
+aaacccc
+aacc
+aaacc
+#
+
+SAIDA 2:
+Cadeia aaccc aceita por estados finais
+Cadeia aaacccc aceita por estados finais
+Cadeia aacc rejeitada por estados finais
+Cadeia aaacc rejeitada por estados finais
